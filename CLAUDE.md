@@ -1,4 +1,12 @@
-> **Extends:** `livery/CLAUDE-base.md` — read that file first, then this one.
+> ## MANDATORY PRE-FLIGHT — DO THIS BEFORE ANYTHING ELSE
+>
+> 1. If `livery/CLAUDE-base.md` does not exist or `livery/` is empty, run:
+>    `git submodule update --init --recursive`
+> 2. Read `livery/CLAUDE-base.md` in full. It is the base constitution for
+>    this project. Every rule in that file applies to every session.
+> 3. Then read this file.
+>
+> **Extends:** `livery/CLAUDE-base.md`
 >
 > **Runtime:** This project uses Livery with Superpowers as the execution
 > engine. See `livery/adapter-superpowers.md` for the integration.
