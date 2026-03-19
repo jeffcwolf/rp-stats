@@ -11,6 +11,7 @@
 | Date | Change |
 |---|---|
 | 2026-03-19 | Initial specification created from Phase 0 brainstorming |
+| 2026-03-19 | Changed workspace grouping from JS expand/collapse to CSS-only visual grouping (always visible, indented member rows) |
 
 ---
 
@@ -116,8 +117,11 @@ For workspace projects, rp-stats produces:
 - **One row per member crate** with that crate's individual stats.
 
 In the JSON output, member crate data is nested under the workspace
-entry. In the HTML output, member rows are grouped under the workspace
-row and **collapsed by default** — the user clicks to expand.
+entry. In the HTML output, member rows are **visually grouped** under
+the workspace row using CSS only — no JavaScript required for grouping.
+Member rows are always visible, indented with a left border or background
+tint to distinguish them from the workspace summary row. The workspace
+summary row is styled bold/highlighted as the group header.
 
 ### JSON Registry Format
 
@@ -190,9 +194,10 @@ CSS and JavaScript are inlined). The dashboard contains:
   (substring match, case-insensitive).
 - **Toggle filters:** Checkboxes for "Has CI," "Has tests/ dir," and
   "Is workspace" that show/hide matching rows.
-- **Workspace grouping:** Workspace rows are expandable — click to
-  reveal/collapse member crate rows beneath the workspace summary row.
-  Collapsed by default.
+- **Workspace grouping:** Member crate rows appear directly beneath
+  their workspace summary row, visually indented via CSS (left border
+  or background tint). Always visible — no expand/collapse. No
+  JavaScript required for grouping.
 
 **No external resources.** The HTML file must render correctly when opened
 from the local filesystem (`file://` protocol) with no network access.
@@ -245,7 +250,7 @@ Every box must be checked to declare v1.0. This is the definition of done.
 - [ ] HTML table supports ascending/descending sort on every column
 - [ ] HTML table has a text filter for project name
 - [ ] HTML table has toggle filters for Has CI, Has tests dir, Is workspace
-- [ ] HTML workspace rows are expandable/collapsible, collapsed by default
+- [ ] HTML workspace member rows are visually grouped (indented, styled) beneath their workspace summary row
 
 ### Quality
 
@@ -266,7 +271,7 @@ Every box must be checked to declare v1.0. This is the definition of done.
 |---|---|---|---|---|
 | R1 | **Workspace member glob resolution is complex.** Cargo supports glob patterns like `crates/*` in `[workspace].members`. Resolving these correctly (including nested globs, exclude patterns) requires careful implementation. | Medium | High — incorrect resolution means wrong project list | Implement basic glob matching (`*` only, no `**` or complex patterns). Document the limitation. Test with real-world workspace layouts. |
 | R2 | **Git commit parsing without shelling out is fragile.** Reading `.git/HEAD`, following refs, and parsing commit objects handles only the simple case. Packed refs, shallow clones, and worktrees add edge cases. | Medium | Medium — git info may be `null` unexpectedly | Use `git log -1` as a subprocess (git is the one allowed external tool). Fall back to `null` on any failure. |
-| R3 | **HTML expand/collapse adds JavaScript complexity.** Grouped workspace rows with toggle behavior require non-trivial JS in a single self-contained file. | Low | Medium — increases HTML generation complexity and testing surface | Keep the JS minimal (vanilla, no framework). Test expand/collapse behavior manually. Consider deferring to v1.1 if implementation time exceeds estimate. |
+| R3 | **Sorting/filtering JS interacts with grouped rows.** Column sorting and filtering must keep workspace member rows adjacent to their parent workspace row, not sort them independently. | Low | Medium — broken sorting scatters member rows away from their workspace | Sort/filter operates on workspace groups as units: the workspace summary row determines sort position, and all its member rows follow. Member rows are never sorted independently of their parent. |
 | R4 | **TOML parsing edge cases.** Real-world Cargo.toml files use inline tables, dotted keys, multi-line strings, and other TOML features. A naive parser will break. | Low | High — broken parsing means wrong or missing stats | Use a well-tested TOML parsing crate (`toml` or `toml_edit`). Do not write a custom parser. |
 | R5 | **LOC counting in `target/` or generated files.** If `--recursive` mode fails to exclude `target/` directories or generated code, LOC counts will be wildly inflated. | Low | High — misleading data | Hardcode `target/` exclusion. Also exclude common generated directories (`out/`, `.cargo/`). Test with a project that has a populated `target/`. |
 | R6 | **Large directory trees with `--recursive`.** A user points rp-stats at `~/code` containing hundreds of nested projects with large `target/` directories. Even with exclusions, the walk could be slow. | Low | Low — tool is slow but correct | Exclusion of `target/` and hidden dirs mitigates the main cost. No further optimization needed for v1. |
