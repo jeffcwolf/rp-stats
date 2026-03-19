@@ -12,6 +12,7 @@
 |---|---|
 | 2026-03-19 | Initial specification created from Phase 0 brainstorming |
 | 2026-03-19 | Changed workspace grouping from JS expand/collapse to CSS-only visual grouping (always visible, indented member rows) |
+| 2026-03-19 | Renamed default output files to `registry.json` and `dashboard.html`; output written to rp-stats project directory |
 
 ---
 
@@ -57,15 +58,17 @@ rp-stats <target-dir> [OPTIONS]
 
 | Flag | Default | Description |
 |---|---|---|
-| `--output-json <path>` | `./rp-stats.json` | Path for the JSON registry output |
-| `--output-html <path>` | `./rp-stats.html` | Path for the HTML dashboard output |
+| `--output-json <path>` | `registry.json` in the rp-stats directory | Path for the JSON registry output |
+| `--output-html <path>` | `dashboard.html` in the rp-stats directory | Path for the HTML dashboard output |
 | `--json-only` | false | Produce only the JSON registry, skip HTML |
 | `--html-only` | false | Produce only the HTML dashboard, skip JSON |
 | `--recursive` | false | Recurse into subdirectories to find projects (default: immediate children only) |
 
 **Notes:**
 - `--json-only` and `--html-only` are mutually exclusive.
-- Default output paths are relative to the current working directory.
+- Default output paths are relative to the rp-stats binary/project
+  directory (i.e., where rp-stats itself lives), not the scanned
+  target directory or the current working directory.
 - When `--recursive` is set, the scanner skips `target/`, hidden
   directories (`.`-prefixed), and directories already identified as
   members of a detected workspace.
